@@ -1,16 +1,12 @@
-extern crate bindgen;
-extern crate git2;
-extern crate regex;
-
 use git2::Repository;
-use regex::Regex;
 use std::env;
 use std::fs::remove_dir_all;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-const LIBINJECTION_URL: &'static str = "https://github.com/client9/libinjection";
-const BUILD_DIR_NAME: &'static str = "libinjection";
+const LIBINJECTION_URL: &str = "https://github.com/libinjection/libinjection";
+const LIBINJECTION_COMMIT: &str = "bd86522711f6fd2b5f257023e19627fd6c1d5ca0";
+const BUILD_DIR_NAME: &str = "libinjection";
 
 fn clone_libinjection(build_dir: &Path, version: &str) -> Option<()> {
     let repo = Repository::clone(LIBINJECTION_URL, build_dir).ok()?;
@@ -18,9 +14,9 @@ fn clone_libinjection(build_dir: &Path, version: &str) -> Option<()> {
     repo.set_head_detached(rev.id()).ok()
 }
 
-fn run_make(rule: &str, cwd: &Path) -> bool {
-    let output = Command::new("make")
-        .arg(rule)
+fn run(cmd: &str, args: &[&str], cwd: &Path) -> bool {
+    let output = Command::new(cmd)
+        .args(args)
         .env("OUT_DIR", env::var("OUT_DIR").unwrap())
         .current_dir(cwd)
         .output()
@@ -32,46 +28,49 @@ fn run_make(rule: &str, cwd: &Path) -> bool {
     }
 }
 
-fn fix_python_version() -> Option<()> {
-    if if let Ok(output) = Command::new("python").arg("-V").output() {
-        let python_version = String::from_utf8_lossy(&output.stdout).to_string();
-        !Regex::new("Python 2.*")
-            .ok()?
-            .is_match(python_version.as_str())
-    } else {
-        true
-    } {
-        let cwd = env::current_dir().ok()?;
-        if !run_make("fix-python", cwd.as_path()) {
-            return None;
-        }
-    }
-    Some(())
-}
-
 fn main() {
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let mut build_parent_dir = out_path.join(BUILD_DIR_NAME);
+    let build_parent_dir = out_path.join(BUILD_DIR_NAME);
 
     let _ = remove_dir_all(build_parent_dir.as_path());
 
-    if clone_libinjection(build_parent_dir.as_path(), "v3.10.0").is_none() {
+    if clone_libinjection(build_parent_dir.as_path(), LIBINJECTION_COMMIT).is_none() {
         panic!("unable to clone libinjection");
     }
 
-    if fix_python_version().is_none() {
-        panic!("unable to fix python version");
+    if !run("bash", &["autogen.sh"], build_parent_dir.as_path()) {
+        panic!("unable to run autogen.sh");
     }
 
-    build_parent_dir.push("src");
-    if !run_make("all", build_parent_dir.as_path()) {
+    if !run("bash", &["configure"], build_parent_dir.as_path()) {
+        panic!("unable to run configure");
+    }
+
+    if !run("make", &["-C", "src"], build_parent_dir.as_path()) {
         panic!("unable to make libinjection");
     }
 
-    println!("cargo:rustc-link-lib=static=injection");
-    println!("cargo:rustc-link-search={}", build_parent_dir.display());
+    if !run(
+        "ar",
+        &[
+            "-crs",
+            "libinjection.a",
+            "libinjection_sqli.o",
+            "libinjection_html5.o",
+            "libinjection_xss.o",
+        ],
+        build_parent_dir.join("src").as_path(),
+    ) {
+        panic!("unable to build static library");
+    }
 
-    let h_path = build_parent_dir.join("libinjection.h");
+    println!("cargo:rustc-link-lib=static=injection");
+    println!(
+        "cargo:rustc-link-search={}",
+        build_parent_dir.join("src").display()
+    );
+
+    let h_path = build_parent_dir.join("src/libinjection.h");
     let bindings = bindgen::Builder::default()
         .header(h_path.to_str().unwrap())
         .generate()

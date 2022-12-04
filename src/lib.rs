@@ -2,7 +2,7 @@
 //!
 //! Rust bindings for (libinjection)][1]
 //!
-//! [1]: https://github.com/client9/libinjection
+//! [1]: https://github.com/libinjection/libinjection
 //!
 //! ## How to Use
 //!
