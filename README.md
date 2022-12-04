@@ -1,15 +1,15 @@
 # libinjection-rs
 
-[![crates.io](https://img.shields.io/crates/v/libinjection.svg)](https://crates.io/crates/libinjection) [![Documentation](https://img.shields.io/badge/Docs-libinjection-blue.svg)](https://docs.rs/libinjection) [![Build Status](https://travis-ci.org/arvancloud/libinjection-rs.svg)](https://travis-ci.org/arvancloud/libinjection-rs) ![Crates.io](https://img.shields.io/crates/l/rustc-serialize.svg)
+[![crates.io](https://img.shields.io/crates/v/libinjection.svg)](https://crates.io/crates/libinjection) [![Documentation](https://img.shields.io/badge/Docs-libinjection-blue.svg)](https://docs.rs/libinjection) ![Crates.io](https://img.shields.io/crates/l/rustc-serialize.svg) [![Test](https://github.com/yaa110/libinjection-rs/actions/workflows/test.yml/badge.svg)](https://github.com/yaa110/libinjection-rs/actions/workflows/test.yml)
 
-Rust bindings for [libinjection](https://github.com/client9/libinjection).
+Rust bindings for [libinjection](https://github.com/libinjection/libinjection).
 
 ## How to use
 
 - Add `libinjection` to `dependencies` of `Cargo.toml`:
 
 ```toml
-libinjection = "0.2"
+libinjection = "*"
 ```
 
 - Import crate:
@@ -30,7 +30,7 @@ assert!(is_sqli);
 assert_eq!("s&sos", fingerprint);
 ```
 
-**Fingerprints:** Please refer to [fingerprints.txt](https://github.com/client9/libinjection/blob/master/src/fingerprints.txt).
+**Fingerprints:** Please refer to [fingerprints.txt](https://github.com/libinjection/libinjection/blob/master/src/fingerprints.txt).
 
 - XSS Detection:
 
