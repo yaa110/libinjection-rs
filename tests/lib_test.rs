@@ -1,5 +1,3 @@
-extern crate libinjection;
-
 use libinjection::{sqli, xss};
 
 #[test]

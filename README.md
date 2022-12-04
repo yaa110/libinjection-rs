@@ -15,8 +15,6 @@ libinjection = "*"
 - Import crate:
 
 ```rust
-extern crate libinjection;
-
 use libinjection::{sqli, xss};
 ```
 

@@ -7,8 +7,6 @@
 //! ## How to Use
 //!
 //! ```
-//! extern crate libinjection;
-//!
 //! use libinjection::{sqli, xss};
 //!
 //! fn main() {
