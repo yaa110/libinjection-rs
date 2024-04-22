@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 const LIBINJECTION_URL: &str = "https://github.com/libinjection/libinjection";
-const LIBINJECTION_COMMIT: &str = "271bf395732dcf6fd3689d0d456813018661e48f";
+const LIBINJECTION_COMMIT: &str = "b9fcaaf9e50e9492807b23ffcc6af46ee1f203b9";
 const BUILD_DIR_NAME: &str = "libinjection";
 
 fn clone_libinjection(build_dir: &Path, version: &str) -> Option<()> {
