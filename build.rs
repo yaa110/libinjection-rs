@@ -1,17 +1,28 @@
-use git2::Repository;
 use std::env;
 use std::fs::remove_dir_all;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
 const LIBINJECTION_URL: &str = "https://github.com/libinjection/libinjection";
-const LIBINJECTION_COMMIT: &str = "271bf395732dcf6fd3689d0d456813018661e48f";
+const LIBINJECTION_COMMIT: &str = "73268cfd85f9ee625e1d73ec2b37672bb2fd83f6";
 const BUILD_DIR_NAME: &str = "libinjection";
 
-fn clone_libinjection(build_dir: &Path, version: &str) -> Option<()> {
-    let repo = Repository::clone(LIBINJECTION_URL, build_dir).ok()?;
-    let rev = repo.revparse_single(version).ok()?;
-    repo.set_head_detached(rev.id()).ok()
+fn clone_libinjection(build_dir: &Path) {
+    if !run(
+        "git",
+        &[
+            "clone",
+            LIBINJECTION_URL,
+            build_dir.as_os_str().to_str().unwrap(),
+        ],
+        Path::new("/"),
+    ) {
+        panic!("unable to clone the repo");
+    }
+
+    if !run("git", &["reset", "--hard", LIBINJECTION_COMMIT], build_dir) {
+        panic!("unable to checkout to the commit");
+    }
 }
 
 fn run(cmd: &str, args: &[&str], cwd: &Path) -> bool {
@@ -34,9 +45,7 @@ fn main() {
 
     let _ = remove_dir_all(build_parent_dir.as_path());
 
-    if clone_libinjection(build_parent_dir.as_path(), LIBINJECTION_COMMIT).is_none() {
-        panic!("unable to clone libinjection");
-    }
+    clone_libinjection(build_parent_dir.as_path());
 
     if !run("bash", &["autogen.sh"], build_parent_dir.as_path()) {
         panic!("unable to run autogen.sh");
