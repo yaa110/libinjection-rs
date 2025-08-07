@@ -10,7 +10,7 @@ license = "MIT/Apache-2.0"
 name = "libinjection"
 readme = "README.md"
 repository = "https://github.com/yaa110/libinjection-rs"
-version = "0.3.7"
+version = "0.3.8"
 
 [build-dependencies]
-bindgen = "0.71"
+bindgen = "0.72"
